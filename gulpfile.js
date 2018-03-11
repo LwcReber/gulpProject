@@ -64,13 +64,13 @@ gulp.task('presass', function() {
       //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
       keepSpecialComments: '*'
     }))
-    .pipe(gulp.dest('./dist')) // 打包到dist中
+    .pipe(gulp.dest('./dist/css')) // 打包到dist中
 
 })
 
 gulp.task('cssmin', function() {
   gulp.src('./src/styles/**/*.css')
-    .pipe(concat('common.min.css'))
+    // .pipe(concat('common.min.css'))// 是否合拼所有的js文件，单页面应用合拼，多页面不需要合拼
     .pipe(postcss(plugins))
     .pipe(cssmin({
       //类型：Boolean 默认：true [是否开启高级优化（合并选择器等）]
@@ -82,7 +82,7 @@ gulp.task('cssmin', function() {
       //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
       keepSpecialComments: '*'
     }))
-    .pipe(gulp.dest('./dist'))
+    .pipe(gulp.dest('./dist/css'))
 })
 
 // eslint 书写限制
@@ -100,14 +100,14 @@ gulp.task('jsmin', ['lint'], function() {
     .pipe(babel({
       presets: ['es2015', 'stage-2']
     }))
-    .pipe(concat('app.min.js'))
+    // .pipe(concat('app.min.js')) // 是否合拼所有的js文件，单页面应用合拼，多页面不需要合拼
     .pipe(uglify({
         mangle: true,//类型：Boolean 默认：true 是否修改变量名
         compress: true,//类型：Boolean 默认：true 是否完全压缩
         // preserveComments: 'all' //保留所有注释
     }))
     .pipe(sourcemaps.write("."))
-    .pipe(gulp.dest('./dist'))
+    .pipe(gulp.dest('./dist/js'))
 })
 
 gulp.task('revhtml', function() {

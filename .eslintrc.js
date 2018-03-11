@@ -9,7 +9,7 @@ module.exports = {
   'env': {
     'browser': true,
   },
-  'extends': 'airbnb-base', //规则： 0 禁用 1 启用
+  'extends': 'airbnb-base',
   'rules': {
     'arrow-parens': 0,
     'indent': ["error", 2], // tab 缩进 格数
