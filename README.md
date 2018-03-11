@@ -1,1 +1,2 @@
-# gulpProject
+# gulp工具项目demo
+  用于前后端分离项目，可以使用es6语法，sass，自动打包压缩代码
