@@ -101,11 +101,11 @@ gulp.task('jsmin', ['lint'], function() {
       presets: ['es2015', 'stage-2']
     }))
     // .pipe(concat('app.min.js')) // 是否合拼所有的js文件，单页面应用合拼，多页面不需要合拼
-    .pipe(uglify({
-        mangle: true,//类型：Boolean 默认：true 是否修改变量名
-        compress: true,//类型：Boolean 默认：true 是否完全压缩
-        // preserveComments: 'all' //保留所有注释
-    }))
+    // .pipe(uglify({
+    //     mangle: true,//类型：Boolean 默认：true 是否修改变量名
+    //     compress: false,//类型：Boolean 默认：true 是否完全压缩
+    //     preserveComments: 'all' //保留所有注释
+    // }))
     .pipe(sourcemaps.write("."))
     .pipe(gulp.dest('./dist/js'))
 })

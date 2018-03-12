@@ -16,7 +16,7 @@
 
   ```
     打开两个node窗口，窗口一输入命令行npm start 这个是监听gulp所有任务的命令
-    窗口二输入命令 npm server 这个是开启本地服务，自动刷新浏览器，浏览器需要安装liverreload插件
+    在dist文件夹里面打开node窗口二输入命令 npm run server 这个是开启本地服务，自动刷新浏览器，浏览器需要安装livereload插件
   ```
 
 ##  2 文件夹说明
