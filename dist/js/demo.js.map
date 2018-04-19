@@ -1,1 +1,0 @@
-{"version":3,"sources":["demo.js"],"names":["console","log","a","b"],"mappings":";;AAAAA,QAAQC,GAAR,CAAY,IAAZ;AACA;AACA,IAAIC,IAAI,CAAR;AACA,IAAIC,iBAAeD,CAAf,cAAJ;AACAF,QAAQC,GAAR,CAAYE,CAAZ","file":"demo.js","sourcesContent":["console.log(1213);\r\n// 注释\r\nlet a = 5;\r\nlet b = `fjasiofj${a}fsdofjaof`;\r\nconsole.log(b);\r\n"]}
