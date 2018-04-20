@@ -3,8 +3,9 @@ let b = 3;
 let c = a + b;
 let d = 0;
 if(a == 0) {
-  console.log(c);
+  if(d==0) {
+    console.log(987);
+  }
   console.log(456);
   console.log(888);
-  console.log(123);
 }

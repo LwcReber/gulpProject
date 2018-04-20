@@ -4,7 +4,6 @@ let sourcemaps = require("gulp-sourcemaps");
 let babel = require("gulp-babel"); // babel es6转换
 let uglify = require('gulp-uglify');
 let concat = require('gulp-concat'); // 合拼
-let rename = require('gulp-rename');
 let clean = require('gulp-clean');
 let cssmin = require('gulp-minify-css');
 let postcss = require('gulp-postcss');
@@ -15,24 +14,20 @@ let shortcss = require('postcss-short');
 let sass = require('gulp-sass');
 let del = require('del');
 let htmlmin = require('gulp-htmlmin');
-let rev = require('gulp-rev'); //- 对文件名加MD5后缀
-let revCollector = require('gulp-rev-collector'); //- 路径替换
+let cache = require('gulp-cache');
+let imagemin = require('gulp-imagemin'); // 压缩图片
+let rev = require('gulp-rev'); // 对文件名加MD5后缀
+let revCollector = require('gulp-rev-collector'); // 路径替换
 let livereload = require('gulp-livereload'); // 浏览器自动刷新， 浏览器需要安装liverreload插件
 
-let plugins = [
+let runSequence = require('run-sequence');
+
+let cssPlugins = [
   shortcss,
   autoprefixer({
-    browsers: ['> 1%'],
+    browsers: ['last 100 versions','Android >= 4.0', 'iOS 7'],
     cascade: false
-  }), // css浏览器兼容性
-  autoreset({
-    // 重置所有样式
-    reset: {
-      margin: 0,
-      padding: 0,
-      listStyle: 'none'
-    }
-  })
+  }) // css浏览器兼容性
 ];
 
 // html文件打包配置
@@ -46,6 +41,7 @@ let htmlOptions = {
   minifyJS: true, //压缩页面JS
   minifyCSS: true //压缩页面CSS
 };
+// 压缩html
 gulp.task('htmlmin', function() {
   gulp.src('./src/page/*.html') // 本地html文件
     .pipe(htmlmin(htmlOptions))
@@ -58,7 +54,7 @@ gulp.task('presass', function() {
   gulp.src('./src/styles/**/*.scss')
     .pipe(concat('index.scss'))
     .pipe(sass().on('error', sass.logError))
-    .pipe(postcss(plugins))
+    .pipe(postcss(cssPlugins))
     .pipe(cssmin({
       //类型：Boolean 默认：true [是否开启高级优化（合并选择器等）]
       advanced: false,
@@ -69,13 +65,13 @@ gulp.task('presass', function() {
       //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
       keepSpecialComments: '*'
     }))
-    .pipe(gulp.dest('./dist/css')) // 打包到dist中
+    .pipe(gulp.dest('./dist/styles')) // 打包到dist中
 })
 
 gulp.task('cssmin', function() {
   gulp.src('./src/styles/**/*.css')
     // .pipe(concat('common.min.css'))// 是否合拼所有的css文件
-    .pipe(postcss(plugins))
+    .pipe(postcss(cssPlugins))
     .pipe(cssmin({
       //类型：Boolean 默认：true [是否开启高级优化（合并选择器等）]
       advanced: false,
@@ -87,13 +83,12 @@ gulp.task('cssmin', function() {
       keepSpecialComments: '*'
     }))
     .pipe(rev())
-    .pipe(gulp.dest('./dist/css'))
+    .pipe(gulp.dest('./dist/styles'))
     .pipe(rev.manifest()) // 生成一个rev-manifest.json
     .pipe(gulp.dest('rev/css')); //- 将 rev-manifest.json 保存到 rev 目录内
 })
 
-
-// 压缩所有js
+// 压缩所有js,包括util文件夹里面的js
 gulp.task('jsmin', function() {
   gulp.src(['./src/js/**/*.js', './src/util/**/*.js'])
     .pipe(babel({
@@ -105,6 +100,7 @@ gulp.task('jsmin', function() {
       compress: true, //类型：Boolean 默认：true 是否完全压缩
       preserveComments: 'all' //保留所有注释
     }))
+    // 添加文件版本号
     .pipe(rev())
     .pipe(sourcemaps.init())
     .pipe(sourcemaps.write("."))
@@ -115,47 +111,89 @@ gulp.task('jsmin', function() {
     .pipe(gulp.dest('rev/js'));
 })
 
+// 压缩图片
+gulp.task('imgmin', function() {
+  gulp.src('./src/imgs/*')
+    .pipe(cache(imagemin({
+      optimizationLevel: 3,
+      progressive: true,
+      interlaced: true,
+    })))
+    .pipe(rev())
+    .pipe(gulp.dest('./dist/imgs'))
+    .pipe(rev.manifest()) // 生成一个rev-manifest.json
+    .pipe(gulp.dest('rev/img')); //- 将 rev-manifest.json 保存到 rev 目录内
+
+});
+
 // 复制公共文件到dist中 比如：放置框架的文件jquery.min.js
 gulp.task('copyPub', function() {
-  gulp.src('./src/lib/*')
-    .pipe(gulp.dest('./dist/lib/'))
-  gulp.src('./src/images/*')
-    .pipe(gulp.dest('./dist/images/'))
+  gulp.src('./src/assets/*')
+    .pipe(gulp.dest('./dist/assets/'))
 })
 
 /**
- * 删除掉上一次构建时创建的资源
+ * 删除掉上一次构建时创建的资源， 删除的文件在电脑回收站是不会出现的，请不要把src文件夹的源码路径加到该处
  */
 gulp.task('clean', function() {
-  // gulp.src([
-  //     'rev/**/*.json',
-  //     './dist/**'
-  //     // // 清除所有的js
-  //     // './dist/js/**/*.js',
-  //     // './dist/js/**/*.map',
-  //     // // 清除所有的css
-  //     // './dist/styles/**/*.css'
-  //   ])
-  //   .pipe(clean())
-  del(['dist'])
+  del([
+    'dist/imgs/*',
+    'dist/js/*',
+    'dist/assets/*',
+    'dist/page/*',
+    'dist/styles/*',
+    'dist/util/*'
+  ])
 });
 
 /**
- * 替换路径
+ * 修改引用路径
  */
 gulp.task('versionPath', function() {
-  gulp.src(['rev/**/*.json', './src/page/**/*.html'])
-    //将html文件中的js，css文件替换成压缩生成MD5戳的js、css文件
-    .pipe(revCollector())
-    //输出路径
-    .pipe(gulp.dest('./dist/page'))
+  gulp.src(['rev/**/*.json', './src/page/*.html'])
+  //将html文件中的js，css,img,文件替换成压缩生成MD5戳的js、css文件
+  .pipe(revCollector())
+  // 压缩html
+  .pipe(htmlmin(htmlOptions))
+  //输出路径
+  .pipe(gulp.dest('./dist/page'))
+  .pipe(livereload())
 });
 
-// 监听所有任务
-gulp.task('gulpwatch', ['clean', 'copyPub'], () => {
-  gulp.watch(['./src/js/**/*.js', './src/util/**/*.js','./src/page/**/*.html', './src/styles/**/*.scss', './src/styles/**/*.css'],
-  ['jsmin', 'htmlmin', 'presass', 'cssmin', 'versionPath'],
-  (event) => {
-    console.log(`${event.path} was ${event.type} , running tasks...`);
-  })
+// 监听对应文件，执行对应任务
+gulp.task('watch', function() {
+  livereload.listen();
+  // 分开各个任务有自身的watch，修改一个文件时只执行对应的任务。如果把所有任务都放到一个watch里面，一个文件变化将需要执行所有的任务，
+  // 有些文件没有变化的，并不需要执行任务。利于加快打包时间
+  // Watch .js files
+ gulp.watch(['./src/js/**/*.js', './src/util/**/*.js'] , ['jsmin']);
+ // Watch .css files
+ gulp.watch(['./src/styles/**/*.css'], ['cssmin']);
+ // wacth assets file
+ gulp.watch(['./src/assets/*'], ['copyPub']);
+ // Watch imgs file
+ gulp.watch(['src/imgs/**/*'], ['imgmin']);
+ // Watch json/html
+ gulp.watch(['rev/**/*.json', './src/page/*.html'], ['versionPath']);
+})
+
+// 开发环境
+gulp.task('dev', () => {
+  runSequence('clean',
+    'copyPub',
+    ['jsmin', 'cssmin', 'imgmin'], // 开启时先执行一次任务，避免需要监听的文件保存一下才执行对应的任务
+    'watch',
+    (event) => {
+      console.log(`dev start...`);
+    });
+})
+
+// 打包生产
+gulp.task('build', () => {
+  runSequence('clean',
+    ['jsmin', 'cssmin', 'imgmin', 'versionPath'],
+    'copyPub',
+    (event) => {
+      console.log(`build end...`);
+    });
 })

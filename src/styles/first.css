@@ -1,3 +1,8 @@
 .container {
   width: 100px;
 }
+
+.bor {
+  border-radius: 8px;
+  box-shadow: 10px 10px 5px #888;
+}

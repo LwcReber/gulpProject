@@ -1,1 +1,0 @@
-{"version":3,"names":[],"mappings":"","sources":["first-6d377fb799.js"],"sourcesContent":["\"use strict\";var a=0,b=3,c=a+b,d=0;0==a&&(console.log(c),console.log(888),console.log(123));"],"file":"first-6d377fb799.js"}

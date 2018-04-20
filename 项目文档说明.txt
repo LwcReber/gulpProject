@@ -6,23 +6,34 @@
 首先要安装好Nodejs，然后装好cnpm
 cnpm install 下载所有的npm包
 
-打开两个node窗口，gulpProject根目录打开node窗口一输入命令行npm start 这个是监听gulp所有任务的命令
-在dist文件夹里面打开node窗口二输入命令 npm run server 这个是开启本地服务，自动刷新浏览器，浏览器需要安装livereload插件
+gulpProject根目录打开node窗口， 开发环境：输入命令行npm run dev
 
 每次修改完文件，按保存，将会自动执行gulp的任务，如果gulp报错，需要解决报错的问题，才能打包文件
 
-2 文件夹说明
-src里面的文件为本地编写代码文件，dist为gulp打包输出的文件
+2 项目文件夹结构说明
+src： 里面的文件为本地编写代码文件
 
-lib放公共文件，例如库文件，css,js都可以
+dist： gulp打包输出的文件
 
-images 放置图片，页面引入的静态图片等
+images： 放置图片，页面引入的静态图片等
 
-3 确定项目是单页面应用还是多页面
-单页面应该直接在index.html中引入js文件同时根据单页面应该的方式来加载html（具体情况需要看使用的框架是如何进行的单页应用）
+assets：放公共文件，例如第三方库文件 jqeury等，css,js都可以
 
-目前配置的是多页应用，在tppl文件中写页面html，js文件夹中放页面html引入的js文件，styles放所需的css或sass文件（css）
+page： 所有页面HTML代码
+
+styles： 放置css文件
+
+util： 项目公用的js文件，比如封装好的公用js代码(只能放置js文件，其他文件不作任何处理，不会打包到dist文件夹中)
+
+3 打包发布上线
+命令行： npm run build， gulp将删除dist文件夹里面的文件，然后重新打包一遍。
 
 注意
 
-每次新增或者删除加了文件，需要关闭（node窗口ctr+c）再输入npm start重新开启一下
+每次新增或者删除加了文件，需要关闭（node窗口ctr+c）再输入npm run dev重新开启一下
+
+如果需要手动清理dist文件夹的内容，命令行：npm run clean
+
+如果想要使用保存文件，浏览器自动刷新，需要新开窗口npm run server ， 进入到dist文件夹
+然后谷歌浏览器按照livereload扩展插件，重新开启npm run dev，保存文件时，页面将会自动刷新，涉及到跳转到其他页时，需要手动刷新
+也就是说只能自动刷新当前显示的页面
