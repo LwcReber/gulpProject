@@ -6,9 +6,11 @@
 首先要安装好Nodejs，然后装好cnpm
 cnpm install 下载所有的npm包
 
-gulpProject根目录打开node窗口， 开发环境：输入命令行npm run dev
+gulpProject根目录打开node窗口， 开发环境：输入命令行npm run dev，执行任务后将会自动打开浏览器
+
 
 每次修改完文件，按保存，将会自动执行gulp的任务，如果gulp报错，需要解决报错的问题，才能打包文件
+
 
 2 项目文件夹结构说明
 src： 里面的文件为本地编写代码文件
@@ -27,13 +29,10 @@ util： 项目公用的js文件，比如封装好的公用js代码(只能放置j
 
 3 打包发布上线
 命令行： npm run build， gulp将删除dist文件夹里面的文件，然后重新打包一遍。
+打包后文件将有md5版本
 
 注意
 
-每次新增或者删除加了文件，需要关闭（node窗口ctr+c）再输入npm run dev重新开启一下
+每次新增或者删除了文件，需要关闭（node窗口ctr+c）再输入npm run dev重新开启一下
 
-如果需要手动清理dist文件夹的内容，命令行：npm run clean
-
-如果想要使用保存文件，浏览器自动刷新，需要新开窗口npm run server ， 进入到dist文件夹
-然后谷歌浏览器按照livereload扩展插件，重新开启npm run dev，保存文件时，页面将会自动刷新，涉及到跳转到其他页时，需要手动刷新
-也就是说只能自动刷新当前显示的页面
+如果需要手动清理dist文件夹的内容，可用命令行：npm run clean
