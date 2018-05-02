@@ -1,5 +1,5 @@
 {
-  "name": "cnode_gulp",
+  "name": "project",
   "version": "1.0.0",
   "eslintConfig": {
     "env": {
@@ -13,9 +13,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "gulp dev",
     "build": "gulp build",
+    "watch": "gulp watch",
     "clean": "gulp clean"
   },
-  "author": "",
+  "author": "Reber",
   "license": "ISC",
   "devDependencies": {
     "autoprefixer": "^6.7.7",
@@ -25,7 +26,13 @@
     "babel-preset-stage-2": "^6.22.0",
     "babel-register": "^6.24.0",
     "browser-sync": "^2.23.7",
+    "browserify": "^16.2.0",
     "del": "^3.0.0",
+    "eslint-config-airbnb-base": "^11.1.3",
+    "eslint-friendly-formatter": "^2.0.7",
+    "eslint-loader": "^1.7.1",
+    "eslint-plugin-html": "^2.0.1",
+    "eslint-plugin-import": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-cache": "^1.0.2",
@@ -34,9 +41,11 @@
     "gulp-eslint": "^3.0.1",
     "gulp-htmlmin": "^3.0.0",
     "gulp-imagemin": "^4.1.0",
-    "gulp-livereload": "^3.8.1",
+    "gulp-less": "^4.0.0",
     "gulp-load-plugins": "^1.5.0",
     "gulp-minify-css": "^1.2.4",
+    "gulp-notify": "^3.2.0",
+    "gulp-plumber": "^1.2.0",
     "gulp-postcss": "^6.4.0",
     "gulp-rev": "^8.1.1",
     "gulp-rev-collector": "^1.3.1",

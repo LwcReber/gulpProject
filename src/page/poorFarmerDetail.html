@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0" />
+  <!-- uc强制竖屏 -->
+  <meta name="screen-orientation" content="portrait">
+  <!-- QQ强制竖屏 -->
+  <meta name="x5-orientation" content="portrait" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>贫困户详情</title>
+  <link href="../styles/layer.css" rel="stylesheet" />
+  <link href="../styles/index.css" rel="stylesheet" />
+  <link href="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f0f0f0;
+    }
+
+    #slides img, #slides .imgCon {
+      height: 100%;
+    }
+
+    .topDownBtn {
+      position: fixed;
+      z-index: 1;
+      opacity: 0.9;
+    }
+
+    .topBtnCnt {
+      width: 3.44rem;
+      margin: auto;
+      border-radius: 22px;
+      height: 40px;
+      line-height: 40px;
+      background-color: #ff8800;
+    }
+
+    .slide-btn-right {
+      position: absolute;
+      right: -2px;
+      top: 66px;
+      z-index: 999;
+      background-color: #E6862D;
+      color: #fff;
+      border-radius: 4px;
+      width: 24px;
+      line-height: 24px;
+      margin: 0 auto;
+      height: 96px;
+      opacity: 0.9;
+      text-align: center;
+    }
+
+    .btn-friends {
+      height: 28px;
+      line-height: 28px;
+      width: 85px;
+      margin: auto;
+      text-align: center;
+      border-radius: 16px;
+      color: #fe8700;
+      border: 1px solid #fe8700;
+    }
+
+    .progressBar {
+      width: 1.8rem;
+      text-align: center;
+      color: #ff8800;
+    }
+
+    .saleTypeTitle,
+    .toKnow {
+      margin-top: 10px;
+      padding-left: 14px;
+      height: 45px;
+      line-height: 45px;
+      background-color: #fff;
+    }
+
+    .verMid {
+      vertical-align: middle;
+    }
+
+    /* 头像图片 */
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    #avatarCon {
+      height: 46px;
+    }
+
+    #avatarCon li {
+      float: left;
+    }
+
+    .moreAvatar {
+      margin-top: 9px;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      border-radius: 50%;
+      text-align: center;
+      background-color: #e6e6e6;
+    }
+
+    .dot {
+      display: inline-block;
+      background-color: #fff;
+      width: 4px;
+      height: 4px;
+      margin: 0 2px;
+      vertical-align: middle;
+      border-radius: 50%;
+    }
+
+    .selActive {
+      font-size: 18px;
+      color: #fe8700;
+    }
+
+    /* 进度条start */
+
+    #progressbar {
+      height: 12px;
+      border-radius: 10px;
+      border: 0;
+      z-index: 0
+    }
+
+    .ui-widget-content {
+      background-color: #D7DCE3;
+    }
+
+    .ui-widget-header {
+      background-color: #fe8700;
+      border-radius: 10px;
+    }
+
+    #progressbar .ui-progressbar-value {
+      text-align: center;
+      font-size: 12px;
+      color: #fff;
+    }
+
+    #progressbarText {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      height: 12px;
+      line-height: 12px;
+      color: #fff;
+    }
+
+    /* 进度条end */
+  </style>
+  <script src="../js/rem.js" charset="utf-8"></script>
+</head>
+
+<body>
+  <div id="loading" class="posFix layui-m-layer2" style="z-index:19891015">
+    <div class="layCon layui-m-layercont">
+      <div class="layCel taCen">
+        <i></i>
+        <i class="layui-m-layerload"></i>
+        <i></i>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="topDownBtn bgwr">
+    <div class="layCon layFix tbPad4">
+      <div class="layCel taCen colW " onclick="buy()">
+        <div class="" style="border-radius:22px;height: 40px;line-height:40px;background-color:#ff8800">
+          下载APP，一起去扶贫
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <div class="layCon">
+    <!-- top start -->
+
+    <!-- top end -->
+    <div class="layRow" id="noScro">
+      <div class="layCon">
+        <div class="posAbs" style="overflow:hidden;">
+          <div class="noData layCon bgwr tip" id="noData">
+            <div class="layCel taCen">
+              <p class="iconfont fontS40">&#xe602;</p>
+              <div class="tbPad12">暂无数据</div>
+            </div>
+          </div>
+        </div>
+        <div class="layCon">
+          <div id="scroll" class="posAbs" style="overflow:hidden;">
+            <div id="scrObj">
+              <!-- body start -->
+              <!-- 轮播 -->
+              <div id="slides" class="posRel">
+                <div class="imgCon">
+                  <img class="url" data-value="?x-oss-process=image/resize,m_fixed,h_180,w_350" onerror="Pub.imgNoFind(this,0)" />
+                </div>
+              </div>
+              <!-- 轮播右侧了解TA -->
+              <div class="slide-btn-right">
+                <div>《&nbsp;</div>
+                了解TA
+              </div>
+
+              <div id="loadInfo">
+                <div class="layCon bgwr farme-info tPad4">
+                  <div class="layCel">
+                    <img id="logo" class="logo" data-value="?x-oss-process=image/resize,m_fixed,h_180,w_350" width="45" height="45" onerror="Pub.imgNoFind(this,0)" />
+                  </div>
+                  <div class="layCel">
+                    <!-- <div id="farmerType" class="fontS16" style="color:#2f3034;">
+                      扶贫农户
+                    </div>
+                    <div class="" style="color:#a2a2aa;">
+                      <span>家庭： </span><span id="familyAmount"></span>口人
+                      <span class="lPad14">年收入： ￥</span><span id="income"></span>
+                    </div> -->
+                    <div class="" id="farmerName">
+                    </div>
+                    <div class="">
+                      <div class="layCon bgwr" class="tPad12">
+                        <div class="layCel noPad">
+                          <span><img src="./Css/location.png" alt=""></span>
+                        </div>
+                        <div class="layCel taLef noPad">
+                          <div id="address" class="fontS12 lPad4">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="layCel noPad" style="padding-right:5px;">
+                    <div class="btn-friends">
+                      <img class="verMid" src="./Css/qinyou.png" alt="">
+                      <span>亲友团</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- 地址 -->
+                <!-- <div class="layCon bgwr" class="tPad12">
+                  <div class="layCel">
+                    <span><img src="./Css/location.png" alt=""></span>
+                  </div>
+                  <div class="layCel taLef">
+                    <div id="address">
+                    </div>
+                  </div>
+                </div> -->
+                <!-- 农户简介 -->
+                <div class="layCon bgwr">
+                  <div id="title" class="lrPad14">
+                  </div>
+                  <div id="remark" class="fontS12 lrPad14" style="color:#a2a2aa;">
+                  </div>
+                </div>
+                <!-- 义购 -->
+                <div class="layCon bgwr">
+                  <div class="layCel progressBar">
+                    <div class="fontS12">
+                      义购
+                    </div>
+                    <div class="posRel">
+                      <div id="progressbar"></div>
+                      <!-- 进度文本显示 -->
+                      <div id="progressbarText"></div>
+                    </div>
+                  </div>
+                  <div class="layCel">
+                    <div class="layCon height46" style="overflow:hidden;line-height:46px;">
+                      <div id="avatarScr" class="posAbs">
+                        <ul style="width:230px;" id="avatarCon"></ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 义购类型显示 销售类型切换 -->
+              <div id="saleTypeList" hidden class="saleTypeTitle">
+              </div>
+
+              <!-- 捐助类型显示 -->
+              <div class="toKnow" hidden>
+                <span class="selActive lrPad7">了解TA</span>
+              </div>
+
+              <div id="loadHtml" class="lrPad12 bPad12">
+              </div>
+              <!-- body end -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- bot start -->
+    <div id="btnDonations" class="layRow bgwr height46" style="display:none;">
+      <div class="layCon layFix tbPad4">
+        <div class="layCel taCen colW " onclick="buy()">
+          <div class="lrPad7" style="border-radius:22px;height: 40px;line-height:40px;background-color:#ff8800">
+            捐助
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- bot end -->
+  </div>
+
+
+  <script src="http://cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+  <script src="https://cdn.bootcss.com/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <script src="../assets/fastclick.min.js"></script>
+  <script src="../assets/iscroll-probe.min.js"></script>
+  <script src="../assets//layer.js"></script>
+  <script src="../assets//jquery.cookie.js"></script>
+  <script src="../util/jquery.common.js"></script>
+  <script src="../assets//jquery.slides.min.js"></script>
+  <script src="../js/init.js" charset="utf-8"></script>
+  <script type="text/html" id="saleTypeTmp">
+    <div style="display:inline-block" ontouchstart="changeSaleList(this)">
+      <span class="lrPad7 typeName">
+      </span>
+      <input type="hidden" class="typeVal">
+    </div>
+  </script>
+  <script type="text/html" id="goodTmp">
+    <div class="layMai">
+      <div class="layCon bgwr">
+        <div class="imgCon">
+          <img class="url" data-value="?x-oss-process=image/resize,m_fixed,h_180,w_350" style="width:90px;margin: 3px;" height="90" onerror="Pub.imgNoFind(this,0)" />
+        </div>
+        <div class="layCel taLef">
+          <div class="goodsName" style="color:#2f3034">
+          </div>
+          <div class="fontS12 layTxtpsis remark" style="color:#a2a2aa;width:180px;">
+          </div>
+          <div style="color:#fe8700">
+              <span class="curPrice"></span><span>点</span>/<span class="unit"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </script>
+  <script>
+    // 有义购的和捐助两个类型，对应的页面有些不同
+    var pros, story = '', dt = null; fid = Pub.getParam('id'), type = Pub.getParam('type');
+    var avatarScr;
+    var saleTypeTmp, goodTmp, goodList = [];
+    $(function() {
+      saleTypeTmp = $('#saleTypeTmp').html();
+      goodTmp = $('#goodTmp').html();
+
+      // 头像横向滚动条
+      $("#avatarScr").on('touchmove', function(e) {
+        e.preventDefault()
+      });
+      avatarScr = Pub.cScroll('avatarScr', {
+        scrollX: true,
+        scrollY: false,
+        probeType: 1
+      });
+      if(!fid || !type) {
+        Pub.msgTip('路由参数出错');
+        return;
+      }
+      loadData(fid, type);
+    })
+    // 加载轮播
+    function loadSlider(pics) {
+      var htm = '';
+      if (pics.length == 0) {
+        $('#slides').hide();
+        $('.slide-btn-right').hide();
+        $('.farme-info').css('padding-top', '50px');
+        return;
+      }
+      $.each(pics, function(i, v) {
+        htm += '<div class="imgCon">' +
+          '<img src="' + Pub.isali(v) + '?x-oss-process=image/resize,m_fixed,h_360,w_700" onerror="Pub.imgNoFind(this,0)"/>' +
+          '</div>';
+      })
+      if (pics.length > 0) {
+        $("#slides").html(htm);
+      }
+      if (pics.length > 1) $("#slides").slidesjs({
+        width: 375,
+        height: 180,
+        navigation: false
+      });
+    }
+    // 加载头像
+    function loadAvatar(pics) {
+      var img = '';
+      for (var i = 0; i < pics.length; i++) {
+        if (i == 6) {
+          // 最多显示6个头像
+          img += '<li class="moreAvatar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></li>';
+          break;
+        }
+        img += '<li>'
+        img += '<img class="avatar" src="' + Pub.isali(pics[i].headPic) + '?x-oss-process=image/resize,m_fixed,h_360,w_700" height="28" width="28" onerror="Pub.imgNoFind(this,0)"/>'
+        img += '</li>'
+      }
+      $('#avatarCon').html(img);
+    }
+
+    function loadProgressbar(value) {
+      var progressbar = $("#progressbar");
+      progressbar.progressbar({
+        value: value,
+      });
+      $('#progressbarText').text(value + '%');
+    }
+
+    function changeSaleList(t) {
+      var type = $(t).find('.typeVal').val();
+
+      $(t).addClass('selActive').siblings().removeClass('selActive');
+      var data = getListData(goodList, type);
+      $('#loadHtml').html(Pub.tppl(goodTmp, data));
+    }
+
+    // 根据类型获取相应的销售类型数据
+    function getListData(data, type) {
+      var arr = [];
+      for (var i = 0; i < data.length; i++) {
+        if(type == data[i].saleType) {
+          data[i].url = data[i].logo;
+          arr.push(data[i]);
+        }
+      }
+      return arr;
+    }
+
+    // 超出字数显示...
+    function ellipsis(strings, num) {
+      var string = '';
+      if(strings.length > num) {
+        string = strings.slice(0, num) + '...';
+      } else {
+        string = strings;
+      }
+      return string;
+    }
+    function loadData(id, type) {
+      Pub.ajaxY('/wx/farmer/detail', {
+          farmerId: id,
+        },
+        function(d) {
+          if (d.code == 0) {
+            var dt = d.data;
+            // 加载轮播
+            loadSlider(JSON.parse(dt.listPic));
+            var title = dt.title;
+            var remark = dt.remark;
+            dt.title = ellipsis(title, 80);
+            dt.remark = ellipsis(remark, 240);
+            Pub.loadHtml(dt, 'loadInfo');
+
+            // 转换农户类型
+            var farmerTypeCnt = '';
+            if(dt.farmerType == 0) {
+              farmerTypeCnt = '普通农户';
+            } else if (dt.farmerType == 1) {
+              farmerTypeCnt = '扶贫农户';
+            } else {
+              farmerTypeCnt = '孤寡老人';
+            }
+            $('#farmerType').html(farmerTypeCnt);
+
+            // 义购百分比
+            var progress = parseInt((dt.usedAssistAmount / dt.needAssistAmount) * 100);
+            loadProgressbar(progress);
+            // 加载头像列表
+            loadAvatar(dt.saleRecord);
+
+            if(dt.listSaleType.length == 0) return;
+            // 义购
+            if(type == 0) {
+              $('#saleTypeList').show();
+              $('#saleTypeList').html(Pub.tppl(saleTypeTmp, dt.listSaleType));
+              goodList = dt.listGoods;
+              var firstTypeData = getListData(goodList, dt.listSaleType[0].typeVal);
+              $('#saleTypeList').children().eq(0).addClass('selActive');
+              $('#loadHtml').html(Pub.tppl(goodTmp, firstTypeData));
+            } else {
+              $('.toKnow').show();
+              $('#btnDonations').show();
+              // 捐助
+              var story = JSON.parse(dt.story);
+              var storyHtml = '';
+              for (var i = 0; i < story.length; i++) {
+                if(story[i].type == "string") {
+                  storyHtml += '<div class="tPad4">'+ story[i].content +'</div>'
+                } else if (story[i].type == "image") {
+                  storyHtml += '<div><img src='+ story[i].content +' data-value="?x-oss-process=image/resize,m_fixed,h_180,w_350" style="width:100%; height:100%" onerror="Pub.imgNoFind(this,0)" /></div>'
+                }
+              }
+              $('#loadHtml').html(storyHtml);
+            }
+          } else {
+            Pub.msgTip(d.msg);
+          }
+        })
+    }
+  </script>
+</body>
+
+</html>

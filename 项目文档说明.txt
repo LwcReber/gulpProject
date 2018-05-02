@@ -4,6 +4,9 @@
 1 如何开始使用？
 
 首先要安装好Nodejs，然后装好cnpm
+
+安装cnpm： npm install -g cnpm --registry=https://registry.npm.taobao.org
+
 cnpm install 下载所有的npm包
 
 gulpProject根目录打开node窗口， 开发环境：输入命令行npm run dev，执行任务后将会自动打开浏览器
@@ -11,9 +14,18 @@ gulpProject根目录打开node窗口， 开发环境：输入命令行npm run de
 
 每次修改完文件，按保存，将会自动执行gulp的任务，如果gulp报错，需要解决报错的问题，才能打包文件
 
+css建议使用less或者sass来写，如果是sass的文件后缀为.scss
+
+页面引用less时是 文件名称 + .css，与正常的css一样引用
+
+该项目用的是less，sass也已经配置了任务，如果需要使用sass，需要修改gulp.js
+
+已经使用了eslint，js命名必须是驼峰命名
+
+编写代码时，请尽可能的加上备注，为了让其他人维护或者更新项目时能快速上手
 
 2 项目文件夹结构说明
-src： 里面的文件为本地编写代码文件
+src： 里面的文件为本地编写代码文件(源文件)
 
 dist： gulp打包输出的文件
 
@@ -23,7 +35,7 @@ assets：放公共文件，例如第三方库文件 jqeury等，css,js都可以
 
 page： 所有页面HTML代码
 
-styles： 放置css文件
+styles： 放置样式文件 css、less、scss
 
 util： 项目公用的js文件，比如封装好的公用js代码(只能放置js文件，其他文件不作任何处理，不会打包到dist文件夹中)
 
@@ -36,3 +48,5 @@ util： 项目公用的js文件，比如封装好的公用js代码(只能放置j
 每次新增或者删除了文件，需要关闭（node窗口ctr+c）再输入npm run dev重新开启一下
 
 如果需要手动清理dist文件夹的内容，可用命令行：npm run clean
+
+有eslint报错，就按规范修改好代码，使代码更规范

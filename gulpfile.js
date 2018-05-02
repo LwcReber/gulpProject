@@ -12,13 +12,19 @@ let autoreset = require('postcss-autoreset');
 let shortColor = require('postcss-short-color');
 let shortcss = require('postcss-short');
 let sass = require('gulp-sass');
+let less = require('gulp-less');
 let del = require('del');
 let htmlmin = require('gulp-htmlmin');
 let cache = require('gulp-cache');
 let imagemin = require('gulp-imagemin'); // 压缩图片
 let rev = require('gulp-rev'); // 对文件名加MD5后缀
 let revCollector = require('gulp-rev-collector'); // 路径替换
-let livereload = require('gulp-livereload'); // 浏览器自动刷新， 浏览器需要安装liverreload插件
+let eslint = require('gulp-eslint');
+let eslintConfig = require('./.eslintrc.js');
+
+//当发生异常时提示错误 确保本地安装gulp-notify和gulp-plumber
+let notify = require('gulp-notify');
+let plumber = require('gulp-plumber');
 
 let runSequence = require('run-sequence');
 let filterConf = require('./filter.config.js');
@@ -30,7 +36,8 @@ let browserSync = require('browser-sync').create();
 let cssPlugins = [
   shortcss,
   autoprefixer({
-    browsers: ['last 100 versions', 'Android >= 4.0', 'iOS 7'],
+    // browsers: ['last 100 versions', 'Android >= 4.0', 'iOS 7'],
+    browsers: [ 'last 2 versions', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4' ],
     cascade: false
   }) // css浏览器兼容性
 ];
@@ -53,11 +60,34 @@ gulp.task('htmlmin', function() {
     .pipe(gulp.dest('./dist/page')) // 输出的目标文件夹
 })
 
+// less转换
+gulp.task('preless', function() {
+  // 读取scss文件
+  gulp.src('./src/styles/**/*.less')
+    // .pipe(concat('index.scss'))
+    .pipe(plumber({errorHandler: notify.onError('Error: <%= error.message %>')}))
+    .pipe(less())
+    .pipe(postcss(cssPlugins))
+    .pipe(cssmin({
+      //类型：Boolean 默认：true [是否开启高级优化（合并选择器等）]
+      advanced: false,
+      //保留ie7及以下兼容写法 类型：String 默认：''or'*' [启用兼容模式； 'ie7'：IE7兼容模式，'ie8'：IE8兼容模式，'*'：IE9+兼容模式]
+      compatibility: 'ie7',
+      //类型：Boolean 默认：false [是否保留换行]
+      keepBreaks: true,
+      //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
+      keepSpecialComments: '*'
+    }))
+    .pipe(sourcemaps.init())
+    .pipe(sourcemaps.write("."))
+    .pipe(gulp.dest('./dist/styles')) // 打包到dist中
+})
 
+// sass转换
 gulp.task('presass', function() {
   // 读取scss文件
   gulp.src('./src/styles/**/*.scss')
-    .pipe(concat('index.scss'))
+    // .pipe(concat('index.scss'))
     .pipe(sass().on('error', sass.logError))
     .pipe(postcss(cssPlugins))
     .pipe(cssmin({
@@ -70,6 +100,8 @@ gulp.task('presass', function() {
       //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
       keepSpecialComments: '*'
     }))
+    .pipe(sourcemaps.init())
+    .pipe(sourcemaps.write("."))
     .pipe(gulp.dest('./dist/styles')) // 打包到dist中
 })
 
@@ -87,7 +119,34 @@ gulp.task('cssmin', function() {
       //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
       keepSpecialComments: '*'
     }))
+    .pipe(sourcemaps.init())
+    .pipe(sourcemaps.write("."))
     .pipe(gulp.dest('./dist/styles'))
+})
+// js eslint 检测
+gulp.task("js_eslint", function() {
+  gulp.src('./src/js/**/*.js')
+    .pipe(eslint({
+      rules: eslintConfig.rules,
+      globals: [
+        'jQuery',
+        '$',
+        'Pub'
+      ],
+      envs: [
+        'browser'
+      ]
+    }))
+    .pipe(eslint.formatEach('compact', process.stderr))
+    .pipe(eslint.result(result => {
+      console.log(`ESLint result: ${result.filePath}`);
+      console.log(`# Messages: ${result.messages.length}`);
+      // console.log(JSON.stringify(result.messages));
+      console.log(`# Warnings: ${result.warningCount}`);
+      console.log(`# Errors: ${result.errorCount}`);
+    }))
+    // eslint 编译不通过，直接报错，不允许更新
+    // .pipe(eslint.failAfterError());
 })
 
 // 压缩所有js,包括util文件夹里面的js
@@ -158,9 +217,9 @@ gulp.task('watch', ['browserSync'] ,function() {
   // 分开各个任务有自身的watch，修改一个文件时只执行对应的任务。如果把所有任务都放到一个watch里面，一个文件变化将需要执行所有的任务，
   // 有些文件没有变化的，并不需要执行任务。利于加快打包时间
   // Watch .js files
-  gulp.watch(['./src/js/**/*.js', './src/util/**/*.js'], ['jsmin']);
+  gulp.watch(['./src/js/**/*.js', './src/util/**/*.js'], ['jsmin', 'js_eslint']);
   // Watch .css files
-  gulp.watch(['./src/styles/**/*.css'], ['cssmin']);
+  gulp.watch(['./src/styles/**/*.css', './src/styles/**/*.less'], ['cssmin', 'preless']);
   // wacth assets file
   gulp.watch(['./src/assets/*'], ['copyPub']);
 
@@ -210,7 +269,7 @@ gulp.task('browserSync', function() {
 // 开发环境
 gulp.task('dev', () => {
   runSequence('clean',
-    'copyPub', ['jsmin', 'cssmin', 'imgmin', 'htmlmin'], // 开启时先执行一次任务，避免需要监听的文件保存一下才执行对应的任务
+    'copyPub', ['jsmin', 'cssmin', 'preless', 'imgmin', 'htmlmin'], // 开启时先执行一次任务，避免需要监听的文件保存一下才执行对应的任务
     'watch',
     (event) => {
       console.log(`dev start...`);
@@ -229,7 +288,6 @@ gulp.task('versionPath', function() {
     .pipe(htmlmin(htmlOptions))
     //输出路径
     .pipe(gulp.dest('./dist/page'))
-    .pipe(livereload())
 });
 
 gulp.task('cssmin_prod', function() {
@@ -250,6 +308,53 @@ gulp.task('cssmin_prod', function() {
     .pipe(gulp.dest('./dist/styles'))
     .pipe(rev.manifest()) // 生成一个rev-manifest.json
     .pipe(gulp.dest('rev/css')); //- 将 rev-manifest.json 保存到 rev 目录内
+})
+
+// less 打包
+gulp.task('less_prod', function() {
+  // 读取scss文件
+  gulp.src('./src/styles/**/*.less')
+    // .pipe(concat('index.scss'))
+    .pipe(plumber({errorHandler: notify.onError('Error: <%= error.message %>')}))
+    .pipe(less())
+    .pipe(postcss(cssPlugins))
+    .pipe(cssmin({
+      //类型：Boolean 默认：true [是否开启高级优化（合并选择器等）]
+      advanced: false,
+      //保留ie7及以下兼容写法 类型：String 默认：''or'*' [启用兼容模式； 'ie7'：IE7兼容模式，'ie8'：IE8兼容模式，'*'：IE9+兼容模式]
+      compatibility: 'ie7',
+      //类型：Boolean 默认：false [是否保留换行]
+      keepBreaks: true,
+      //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
+      keepSpecialComments: '*'
+    }))
+    .pipe(rev())
+    .pipe(gulp.dest('./dist/styles'))
+    .pipe(rev.manifest()) // 生成一个rev-manifest.json
+    .pipe(gulp.dest('rev/less')); //- 将 rev-manifest.json 保存到 rev 目录内
+})
+
+// sass 打包
+gulp.task('sass_prod', function() {
+  // 读取scss文件
+  gulp.src('./src/styles/**/*.scss')
+    // .pipe(concat('index.scss'))
+    .pipe(sass().on('error', sass.logError))
+    .pipe(postcss(cssPlugins))
+    .pipe(cssmin({
+      //类型：Boolean 默认：true [是否开启高级优化（合并选择器等）]
+      advanced: false,
+      //保留ie7及以下兼容写法 类型：String 默认：''or'*' [启用兼容模式； 'ie7'：IE7兼容模式，'ie8'：IE8兼容模式，'*'：IE9+兼容模式]
+      compatibility: 'ie7',
+      //类型：Boolean 默认：false [是否保留换行]
+      keepBreaks: true,
+      //保留所有特殊前缀 当你用autoprefixer生成的浏览器前缀，如果不加这个参数，有可能将会删除你的部分前缀
+      keepSpecialComments: '*'
+    }))
+    .pipe(rev())
+    .pipe(gulp.dest('./dist/styles')) // 打包到dist中
+    .pipe(rev.manifest()) // 生成一个rev-manifest.json
+    .pipe(gulp.dest('rev/sass')); //- 将 rev-manifest.json 保存到 rev 目录内
 })
 
 // 压缩所有js,包括util文件夹里面的js
@@ -311,7 +416,7 @@ gulp.task('imgmin_prod', function() {
 });
 
 gulp.task('build', () => {
-  runSequence('clean', ['jsmin_prod', 'cssmin_prod', 'imgmin_prod'],
+  runSequence('clean', ['jsmin_prod', 'cssmin_prod', 'imgmin_prod', 'less_prod'],
     'versionPath',
     'copyPub',
     (event) => {
